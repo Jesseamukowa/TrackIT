@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Create Account"
+            android:textColor="#333333"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:id="@+id/rlPhotoHolder"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:cardCornerRadius="60dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#F5F5F7">
+
+                <ImageView
+                    android:id="@+id/ivProfilePicture"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_user_placeholder" />
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                app:cardBackgroundColor="@color/purple_500"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="2dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_camera"
+                    app:tint="@android:color/white" />
+            </androidx.cardview.widget.CardView>
+        </RelativeLayout>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="30dp" android:text="UserName" android:textStyle="bold" />
+        <EditText android:id="@+id/etRegUser" android:textColor="@color/purple_500" android:layout_width="match_parent" android:layout_height="55dp" android:layout_marginTop="8dp" android:background="@drawable/edittext_bg" android:hint="Jesse Amukowa" android:paddingHorizontal="16dp" />
+
+
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="Password" android:textStyle="bold" />
+        <EditText android:id="@+id/etRegPassword" android:textColor="@color/purple_500" android:layout_width="match_parent" android:layout_height="55dp" android:layout_marginTop="8dp" android:background="@drawable/edittext_bg" android:hint="Create Password" android:inputType="textPassword" android:paddingHorizontal="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Security Question: What is your Best friend's Name?"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etSecurityAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/edittext_bg"
+            android:hint="Your answer"
+            android:paddingHorizontal="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRegister"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="40dp"
+            android:text="Sign Up"
+            app:cornerRadius="30dp"
+            app:backgroundTint="@color/purple_500" />
+
+    </LinearLayout>
+</ScrollView>
