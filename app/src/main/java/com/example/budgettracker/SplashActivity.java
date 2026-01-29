@@ -24,6 +24,6 @@ public class SplashActivity extends AppCompatActivity {
                 startActivity(new Intent(SplashActivity.this, loginActivity.class));
             }
             finish();
-        }, 6000); // Show splash for 6 second
+        }, 3000); // Show splash for 6 second
     }
 }

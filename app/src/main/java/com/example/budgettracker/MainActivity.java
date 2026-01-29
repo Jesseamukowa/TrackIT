@@ -86,7 +86,12 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_stats) {
                 startActivity(new Intent(MainActivity.this, StatsActivity.class));
                 return true;
-            } else if (itemId == R.id.nav_profile) {
+            } else if (id == R.id.nav_chat) {
+                // Launch the ChatActivity
+                Intent intent = new Intent(MainActivity.this, ChatActivity.class);
+                startActivity(intent);
+                return false; // Return false so the "Home" icon stays selec
+            }else if (itemId == R.id.nav_profile) {
                 Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 intent.putExtra("USERNAME", username); // Essential for loading the right user
                 startActivity(intent);
