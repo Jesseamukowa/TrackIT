@@ -2,19 +2,22 @@ package com.example.budgettracker;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.EditText;
-import android.widget.ImageButton;
-
+import android.view.View;
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.ai.client.generativeai.GenerativeModel;
-import com.google.ai.client.generativeai.java.ChatFutures;
-import com.google.ai.client.generativeai.java.GenerativeModelFutures;
-import com.google.ai.client.generativeai.type.Content;
-import com.google.ai.client.generativeai.type.GenerateContentResponse;
+// Modern 2026 Firebase AI Imports
+import com.google.firebase.ai.FirebaseAI;
+import com.google.firebase.ai.GenerativeModel;
+import com.google.firebase.ai.java.GenerativeModelFutures;
+import com.google.firebase.ai.type.HarmBlockMethod;
+import com.google.firebase.ai.type.HarmBlockThreshold;
+import com.google.firebase.ai.type.Content;
+import com.google.firebase.ai.type.GenerateContentResponse;
+import com.google.firebase.ai.type.HarmCategory;
+import com.google.firebase.ai.type.SafetySetting;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -22,147 +25,112 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 public class ChatActivity extends AppCompatActivity {
-
     private RecyclerView rvChat;
     private ChatAdapter adapter;
     private List<ChatMessage> messageList;
     private EditText etInput;
-    private ImageButton btnSend;
+    private ImageButton btnSend, btnClear;
+    private ProgressBar progressBar;
 
-    // Tracky AI Variables
     private GenerativeModelFutures model;
-    private ChatFutures chatSession;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // 1. Setup Toolbar
-        Toolbar toolbar = findViewById(R.id.chatToolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
-        // 2. Initialize UI components
+        // 1. Initialize UI Elements
         rvChat = findViewById(R.id.rvChat);
         etInput = findViewById(R.id.etChatInput);
         btnSend = findViewById(R.id.btnSend);
+        btnClear = findViewById(R.id.btnClear);
+        progressBar = findViewById(R.id.progressBar);
 
-        // 3. Setup RecyclerView
+        // 2. Setup RecyclerView
         messageList = new ArrayList<>();
-        messageList.add(new ChatMessage("Wazi! I'm Tracky. I'm ready to help Jesse save money. How can I assist today?", ChatMessage.TYPE_BOT));
-
         adapter = new ChatAdapter(messageList);
         rvChat.setLayoutManager(new LinearLayoutManager(this));
         rvChat.setAdapter(adapter);
 
-        // 4. Initialize Gemini AI & Chat Session (The Memory)
-        setupTrackyAI();
+        // 3. Setup Firebase Gemini Model (Gemini 3 Flash)
+        SafetySetting harassment = new SafetySetting(
+                HarmCategory.HARASSMENT,
+                HarmBlockThreshold.ONLY_HIGH,
+                HarmBlockMethod.PROBABILITY
+        );
 
-        // 5. Send Button Logic
-        btnSend.setOnClickListener(v -> {
-            String userText = etInput.getText().toString().trim();
-            if (!userText.isEmpty()) {
-                sendMessage(userText);
-            }
+        SafetySetting hateSpeech = new SafetySetting(
+                HarmCategory.HATE_SPEECH,
+                HarmBlockThreshold.ONLY_HIGH,
+                HarmBlockMethod.PROBABILITY
+        );
+
+        // In 2026, we use the FirebaseAI instance which handles the API Key via google-services.json
+        FirebaseAI ai = FirebaseAI.getInstance();
+
+        // "gemini-3-flash" is the recommended model for speed and accuracy in 2026
+        GenerativeModel gm = ai.generativeModel("gemini-3-flash",
+                null, // GenerationConfig (Optional)
+                Arrays.asList(harassment, hateSpeech));
+
+        model = GenerativeModelFutures.from(gm);
+
+        // 4. Button Listeners
+        btnSend.setOnClickListener(v -> sendMessage());
+
+        btnClear.setOnClickListener(v -> {
+            int size = messageList.size();
+            messageList.clear();
+            adapter.notifyItemRangeRemoved(0, size);
+            Toast.makeText(this, "Chat cleared", Toast.LENGTH_SHORT).show();
         });
     }
 
-    private void setupTrackyAI() {
-        // Try the most stable base name
-        GenerativeModel gm = new GenerativeModel("gemini-pro", BuildConfig.GEMINI_API_KEY);
-        model = GenerativeModelFutures.from(gm);
+    private void sendMessage() {
+        String userText = etInput.getText().toString().trim();
+        if (userText.isEmpty()) return;
 
-        // FIX: Break the chain for the system instruction
-        Content.Builder systemBuilder = new Content.Builder();
-        systemBuilder.setRole("user");
-        systemBuilder.addText("You are Tracky, a friendly, witty financial advisor for Jesse at Maseno University. Keep advice short and student-friendly.");
-        Content systemInstruction = systemBuilder.build();
+        // Professional System Context for Jesse's App
+        String systemInstruction = "You are 'Tracky', a budget assistant for Jesse at Maseno University. " +
+                "Keep responses short and use KES (Kenyan Shillings). Context: " + userText;
 
-        // FIX: Break the chain for the bot acknowledgment
-        Content.Builder botBuilder = new Content.Builder();
-        botBuilder.setRole("model");
-        botBuilder.addText("Niaje! I'm ready to help Jesse save money.");
-        Content botAck = botBuilder.build();
-
-        // Start the chat session
-        chatSession = model.startChat(Arrays.asList(systemInstruction, botAck));
-    }
-
-    private void sendMessage(String userText) {
-        // 1. Add User Message to UI
+        // Update UI
         messageList.add(new ChatMessage(userText, ChatMessage.TYPE_USER));
         adapter.notifyItemInserted(messageList.size() - 1);
         rvChat.scrollToPosition(messageList.size() - 1);
+
         etInput.setText("");
+        progressBar.setVisibility(View.VISIBLE);
 
-        // FIX: Break the chain here too
-        Content.Builder userMsgBuilder = new Content.Builder();
-        userMsgBuilder.setRole("user");
-        userMsgBuilder.addText(userText);
-        Content userMessage = userMsgBuilder.build();
-
-        ListenableFuture<GenerateContentResponse> response = chatSession.sendMessage(userMessage);
+        // Request content generation
+        Content userContent = new Content.Builder().addText(systemInstruction).build();
+        ListenableFuture<GenerateContentResponse> response = model.generateContent(userContent);
 
         Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
             @Override
             public void onSuccess(GenerateContentResponse result) {
                 String botReply = result.getText();
                 runOnUiThread(() -> {
-                    messageList.add(new ChatMessage(botReply, ChatMessage.TYPE_BOT));
-                    adapter.notifyItemInserted(messageList.size() - 1);
-                    rvChat.scrollToPosition(messageList.size() - 1);
+                    progressBar.setVisibility(View.GONE);
+                    if (botReply != null) {
+                        messageList.add(new ChatMessage(botReply, ChatMessage.TYPE_BOT));
+                        adapter.notifyItemInserted(messageList.size() - 1);
+                        rvChat.scrollToPosition(messageList.size() - 1);
+                    }
                 });
             }
 
             @Override
             public void onFailure(Throwable t) {
-                Log.e("TrackyAI", "Error: " + t.getMessage());
+                Log.e("TRACKY_ERROR", "Firebase AI Failure: " + t.getMessage());
                 runOnUiThread(() -> {
-                    messageList.add(new ChatMessage("Sorry, I'm having trouble connecting to the network.", ChatMessage.TYPE_BOT));
-                    adapter.notifyItemInserted(messageList.size() - 1);
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(ChatActivity.this, "Connection Error. Check google-services.json", Toast.LENGTH_LONG).show();
                 });
             }
-        }, androidx.core.content.ContextCompat.getMainExecutor(this));
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(android.view.Menu menu) {
-        getMenuInflater().inflate(R.menu.chat_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(android.view.MenuItem item) {
-        if (item.getItemId() == R.id.action_clear_chat) {
-            clearChatSession();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void clearChatSession() {
-        // 1. Wipe the UI list
-        messageList.clear();
-
-        // 2. Add the initial welcome message back
-        messageList.add(new ChatMessage("Chat cleared! How can I help you start fresh, Jesse?", ChatMessage.TYPE_BOT));
-        adapter.notifyDataSetChanged();
-
-        // 3. Re-initialize Tracky to wipe his 'Memory'
-        setupTrackyAI();
-
-        // 4. Feedback for the user
-        android.widget.Toast.makeText(this, "Memory Reset", android.widget.Toast.LENGTH_SHORT).show();
+        }, Executors.newSingleThreadExecutor());
     }
 }

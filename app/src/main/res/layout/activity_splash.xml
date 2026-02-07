@@ -13,7 +13,7 @@
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@android:drawable/ic_menu_compass"
+            android:src="@mipmap/ic_launcher_logo"
             android:contentDescription="Logo" />
 
         <TextView
@@ -30,7 +30,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Your finances, mastered."
-            android:textColor="#E1BEE7"
+            android:textStyle="bold"
+            android:textColor="#ffffff"
             android:textSize="16sp" />
     </LinearLayout>
 </RelativeLayout>

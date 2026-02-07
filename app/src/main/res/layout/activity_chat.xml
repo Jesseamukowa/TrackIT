@@ -5,6 +5,17 @@
     android:layout_height="match_parent"
     android:background="#FAF9FF">
 
+
+    <ImageButton
+        android:id="@+id/btnClear"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="8dp"
+        android:contentDescription="Clear Chat"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@android:drawable/ic_menu_delete" />
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/chatToolbar"
         android:layout_width="match_parent"
@@ -21,6 +32,14 @@
         android:layout_below="@id/chatToolbar"
         android:padding="10dp"
         android:clipToPadding="false"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:indeterminateTint="#1A237E" />
 
     <LinearLayout
         android:id="@+id/inputArea"

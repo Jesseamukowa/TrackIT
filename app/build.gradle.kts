@@ -1,26 +1,24 @@
 import java.util.Properties
+
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.budgettracker"
     compileSdk = 34
 
-    buildFeatures {
-        buildConfig = true
-    }
-
     defaultConfig {
         applicationId = "com.example.budgettracker"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // 1. A more robust way to load the properties file in Kotlin DSL
+        // --- API KEY CONFIGURATION START ---
         val properties = Properties()
         val propertiesFile = project.rootProject.file("local.properties")
 
@@ -28,13 +26,28 @@ android {
             propertiesFile.inputStream().use { properties.load(it) }
         }
 
-        // 2. Map the key to BuildConfig
+        // Get the value from local.properties
         val apiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
+
+        // Use DOUBLE quotes for the type "String" and for the apiKey variable
         buildConfigField("String", "GEMINI_API_KEY", "\"$apiKey\"")
+
+    }
+
+    packaging {
+        resources {
+            // Remove the "META-INF/*" line and use these specific ones instead
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
+
+            // If you still see conflicts with license files, add these:
+            excludes += "/META-INF/LICENSE*"
+            excludes += "/META-INF/NOTICE*"
+        }
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = false
             setProguardFiles(listOf(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"))
         }
@@ -44,20 +57,36 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    buildFeatures {
+        // Required to use BuildConfig in modern Android Studio
+        buildConfig = true
+    }
 }
 
+
 dependencies {
-    implementation("androidx.appcompat:appcompat:1.6.1") // Standard version
+    // UI and Core Libraries
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
-    // MPAndroidChart for your Stats screen
+    // Charts for your Budget Stats screen
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
-    // Gemini SDK for Tracky AI
-    implementation("com.google.ai.client.generativeai:generativeai:0.9.0") // Update to 0.9.0 if possible
-    implementation("com.google.guava:guava:31.1-android")
+    implementation("com.google.code.gson:gson:2.10.1")
 
+
+
+        //The official Android-optimized Gemini SDK
+    implementation(platform("com.google.firebase:firebase-bom:34.8.0")) // Use latest BoM
+    implementation("com.google.firebase:firebase-ai")
+
+    implementation("com.google.guava:guava:33.0.0-android")
+
+
+
+    // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

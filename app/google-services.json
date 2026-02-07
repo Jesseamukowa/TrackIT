@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1063403904473",
+    "project_id": "trackit-b713e",
+    "storage_bucket": "trackit-b713e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1063403904473:android:1e90000b879fc001c44dc8",
+        "android_client_info": {
+          "package_name": "com.example.budgettracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMBuW8tY7nD1ccK0IhCnjpliMIsTXdZQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
